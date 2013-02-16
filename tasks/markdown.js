@@ -57,11 +57,9 @@ module.exports = function(grunt) {
 
     }
 
-    markdown.setOptions(options);
-
     grunt.verbose.write('Marking down...');
 
-    html = markdown(src);
+    html = markdown(src, options);
 
     return _.template(template, {content:html});
 
