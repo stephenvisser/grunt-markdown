@@ -12,9 +12,8 @@ module.exports = function(grunt) {
   var path = require('path');
   var markdown = require('marked');
   var hljs = require('highlight.js');
-  var _ = require('lodash');
 
-  grunt.registerHelper('markdown', function(src, options, template) {
+  function doMarkdown(src, options, template) {
 
     var html = null;
     var codeLines = options.codeLines;
@@ -57,33 +56,24 @@ module.exports = function(grunt) {
 
     }
 
-    markdown.setOptions(options);
-
-    grunt.verbose.write('Marking down...');
-
-    html = markdown(src);
-
-    return _.template(template, {content:html});
-
-  });
+    html = markdown(src, options);
+    
+    if (template) {
+      return grunt.template.process(template, {data: {content:html}});
+    } else {
+      return html;
+    }
+  }
 
   grunt.registerMultiTask('markdown', 'compiles markdown files into html', function() {
-    var destPath = this.data.dest;
-    var options = this.data.options || {};
-    var extension = this.data.extenstion || 'html';
-    var templateFn = this.data.template || path.join(__dirname, 'template.html');
-    var template = grunt.file.read(templateFn);
-
-    grunt.file.expandFiles(this.data.files).forEach(function(filepath) {
-
-      var file = grunt.file.read(filepath);
-
-      var html = grunt.helper('markdown', file, options, template);
-      var ext = path.extname(filepath);
-      var dest = path.join(destPath, path.basename(filepath, ext) +'.'+ extension);
+    
+    this.files.forEach(function(file) {
+      var html = doMarkdown(grunt.file.read(file.src), this.data.options, this.data.template);
+      var ext = path.extname(file.src);
+      var dest = path.join(file.dest, path.basename(file.src, ext) +'.' + file.ext);
       grunt.file.write(dest, html);
 
-    });
+    }, this);
 
   });
 
