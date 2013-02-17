@@ -13,7 +13,7 @@ module.exports = function(grunt) {
   var markdown = require('marked');
   var hljs = require('highlight.js');
 
-  function doMarkdown(src, options, template) {
+  function doMarkdown(src, options) {
 
     var html = null;
     var codeLines = options.codeLines;
@@ -57,18 +57,18 @@ module.exports = function(grunt) {
     }
 
     html = markdown(src, options);
-    
-    if (template) {
-      return grunt.template.process(template, {data: {content:html}});
+
+    if (options.template) {
+      return grunt.template.process(grunt.file.read(options.template), {data: {content:html}});
     } else {
       return html;
     }
   }
 
   grunt.registerMultiTask('markdown', 'compiles markdown files into html', function() {
-    
+
     this.files.forEach(function(file) {
-      var html = doMarkdown(grunt.file.read(file.src), this.data.options, this.data.template);
+      var html = doMarkdown(grunt.file.read(file.src), this.data.options);
       var ext = path.extname(file.src);
       var dest = path.join(file.dest, path.basename(file.src, ext) +'.' + file.ext);
       grunt.file.write(dest, html);
@@ -78,4 +78,3 @@ module.exports = function(grunt) {
   });
 
 };
-
