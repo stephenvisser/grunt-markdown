@@ -67,12 +67,13 @@ module.exports = function(grunt) {
 
   grunt.registerMultiTask('markdown', 'compiles markdown files into html', function() {
 
-    this.files.forEach(function(file) {
-      var html = doMarkdown(grunt.file.read(file.src), this.data.options);
-      var ext = path.extname(file.src);
-      var dest = path.join(file.dest, path.basename(file.src, ext) +'.' + file.ext);
-      grunt.file.write(dest, html);
-
+    this.files.forEach(function(fileSet) {
+        grunt.file.expand(fileSet.src).forEach(function(file){
+        var html = doMarkdown(grunt.file.read(file), this.data.options);
+        var ext = path.extname(file);
+        var dest = path.join(fileSet.dest, path.basename(file, ext) +'.' + fileSet.ext);
+        grunt.file.write(dest, html);
+      }, this);
     }, this);
 
   });
